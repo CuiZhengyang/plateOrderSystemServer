@@ -22,6 +22,8 @@ if($uid==null||$role==null)
     echo json_encode($returnRes);
     exit(-1);
 }
+$uid=CommomUtil::secret2string($uid);
+$role=CommomUtil::secret2string($role);
 CommomUtil::setCookieTime($uid,$role);
 
 if(!isset($_POST["metal"])&&!isset($_POST["product"]))

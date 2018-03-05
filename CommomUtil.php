@@ -12,10 +12,47 @@ date_default_timezone_set("Asia/Shanghai");
 
 class CommomUtil
 {
-    public static function  setCookieTime($id,$role){
-        setcookie("lsbcSessionID",$id,time()+3600,'/');
-        setcookie("lsbcSessionType",$role,time()+3600,'/');
+    //加密
+    public static function string2secret($str)
+    {
+        $key = "123";
+        $td = mcrypt_module_open(MCRYPT_DES, '', 'ecb', '');
+        $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
+        $ks = mcrypt_enc_get_key_size($td);
+
+        $key = substr(md5($key), 0, $ks);
+        mcrypt_generic_init($td, $key, $iv);
+        $secret = mcrypt_generic($td, $str);
+        mcrypt_generic_deinit($td);
+        mcrypt_module_close($td);
+        return $secret;
     }
+
+    //解密
+    public static function secret2string($sec)
+    {
+        $key = "123";
+        $td = mcrypt_module_open(MCRYPT_DES, '', 'ecb', '');
+        $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
+        $ks = mcrypt_enc_get_key_size($td);
+
+        $key = substr(md5($key), 0, $ks);
+        mcrypt_generic_init($td, $key, $iv);
+        $string = mdecrypt_generic($td, $sec);
+        mcrypt_generic_deinit($td);
+        mcrypt_module_close($td);
+        return trim($string);
+    }
+
+    public static function setCookieTime($id, $role)
+    {
+
+        $id = self::string2secret($id);
+        $role = self::string2secret($role);
+        setcookie("lsbcSessionID", $id, time() + 3600, '/');
+        setcookie("lsbcSessionType", $role, time() + 3600, '/');
+    }
+
     public static function getMetalByProduct($product)
     {
         $db = MySQL::getInstance();
@@ -65,8 +102,7 @@ class CommomUtil
                 $sql = "replace INTO orders_board(orderNum,name,material,color,count) VALUES ('" . $orderNum . "','" . $item['product'] . "','" . $item['metal'] . "','" . $item['color'] . "'," . $item['count'] . ")";
                 $db->uidRst($sql);
             }
-        }
-        else{
+        } else {
             foreach ($list as $item) {
                 $sql = "replace INTO orders_commodity(orderNum,name,standard,brand,count) VALUES ('" . $orderNum . "','" . $item['product'] . "','" . $item['metal'] . "','" . $item['color'] . "'," . $item['count'] . ")";
                 $db->uidRst($sql);
@@ -167,46 +203,44 @@ class CommomUtil
                 foreach ($orderlist as $item) {
                     if ($item["complete"] == "0") {
                         array_push($unCompleteList, array(
-                            "orderNum"=>$item["orderNum"]
+                            "orderNum" => $item["orderNum"]
                         ));
                     } else {
                         array_push($completeList, array(
-                            "orderNum"=>$item["orderNum"]
+                            "orderNum" => $item["orderNum"]
                         ));
                     }
                 }
             }
         } else {
 
-            $userInfo=self::getUserInfo($role,$uid);
-            $sql="SELECT orderNum,merchant.name as mName,complete from orders LEFT JOIN merchant on orders.muid=merchant.muid WHERE  orders.suid=" . $uid . " and insertTime>DATE_SUB(CURDATE(), INTERVAL 1 YEAR) ORDER BY insertTime,orders.muid DESC ";
+            $userInfo = self::getUserInfo($role, $uid);
+            $sql = "SELECT orderNum,merchant.name as mName,complete from orders LEFT JOIN merchant on orders.muid=merchant.muid WHERE  orders.suid=" . $uid . " and insertTime>DATE_SUB(CURDATE(), INTERVAL 1 YEAR) ORDER BY insertTime,orders.muid DESC ";
             $orderlist = $db->getRowsArray($sql);
             if (count($orderlist) > 0) {
                 foreach ($orderlist as $item) {
-                    if($item["mName"]!=null)
-                    {
+                    if ($item["mName"] != null) {
                         if ($item["complete"] == "0") {
                             array_push($unCompleteList, array(
-                                "orderNum"=>$item["orderNum"],
-                                "name"=>$item["mName"],
+                                "orderNum" => $item["orderNum"],
+                                "name" => $item["mName"],
                             ));
                         } else {
                             array_push($completeList, array(
-                                "orderNum"=>$item["orderNum"],
-                                "name"=>$item["mName"],
+                                "orderNum" => $item["orderNum"],
+                                "name" => $item["mName"],
                             ));
                         }
-                    }
-                    else{
+                    } else {
                         if ($item["complete"] == "0") {
                             array_push($unCompleteList, array(
-                                "orderNum"=>$item["orderNum"],
-                                "name"=>$userInfo[0]["name"],
+                                "orderNum" => $item["orderNum"],
+                                "name" => $userInfo[0]["name"],
                             ));
                         } else {
                             array_push($completeList, array(
-                                "orderNum"=>$item["mName"],
-                                "name"=>$userInfo[0]["name"],
+                                "orderNum" => $item["mName"],
+                                "name" => $userInfo[0]["name"],
                             ));
                         }
                     }
@@ -235,15 +269,15 @@ class CommomUtil
         $detail = array();
         $states = array();
 //        if ($role == "0") {
-            //商户的订单列表查询 不需要商户名称
-            $sql = "SELECT * from orders WHERE orderNum='" . $orderNum . "' ORDER BY insertTime DESC";
-            $orderlist = $db->getRowsArray($sql);
-            if (count($orderlist) == 1) {
-                $detail["name"] = $orderlist[0]["rname"];
-                $detail["tel"] = $orderlist[0]["rtel"];
-                $detail["rdetailAddr"] = $orderlist[0]["rdetailAddr"];
-                $detail["remarks"] = $orderlist[0]["remarks"];
-            }
+        //商户的订单列表查询 不需要商户名称
+        $sql = "SELECT * from orders WHERE orderNum='" . $orderNum . "' ORDER BY insertTime DESC";
+        $orderlist = $db->getRowsArray($sql);
+        if (count($orderlist) == 1) {
+            $detail["name"] = $orderlist[0]["rname"];
+            $detail["tel"] = $orderlist[0]["rtel"];
+            $detail["rdetailAddr"] = $orderlist[0]["rdetailAddr"];
+            $detail["remarks"] = $orderlist[0]["remarks"];
+        }
 
 //        } else {
 //
@@ -268,62 +302,66 @@ class CommomUtil
 
         return $detail;
     }
+
     /*
      * 查询五金产品的种类
      */
-    public static function getCommodityTypes(){
+    public static function getCommodityTypes()
+    {
         $db = MySQL::getInstance();
-        $sql="SELECT DISTINCT type from commodity ORDER By type";
-        $result=$db->getRowsArray($sql);
-        $types=array();
-        if(count($result)>0)
-        {
-            foreach ($result as $item){
-                array_push($types,$item["type"]);
+        $sql = "SELECT DISTINCT type from commodity ORDER By type";
+        $result = $db->getRowsArray($sql);
+        $types = array();
+        if (count($result) > 0) {
+            foreach ($result as $item) {
+                array_push($types, $item["type"]);
             }
         }
         return $types;
     }
+
     /*
      * 查询五金产品的库存
      */
-    public static function getCommoditys(){
+    public static function getCommoditys()
+    {
         $db = MySQL::getInstance();
-        $sql="SELECT name,type,standard,stockState from commodity ORDER BY type";
-        $result=$db->getRowsArray($sql);
+        $sql = "SELECT name,type,standard,stockState from commodity ORDER BY type";
+        $result = $db->getRowsArray($sql);
         return $result;
     }
 
     /**
      * 获取所有五金产品的名字
      */
-    public static  function getAllCommodityName(){
+    public static function getAllCommodityName()
+    {
         $db = MySQL::getInstance();
-        $commodityNames=array();
+        $commodityNames = array();
         $sql = "SELECT DISTINCT`name` FROM commodity";
         $result = $db->getRowsArray($sql);
         if (count($result) != 0) {
-            foreach ($result as  $item){
-                array_push($commodityNames,$item['name']);
+            foreach ($result as $item) {
+                array_push($commodityNames, $item['name']);
             }
         }
 
         return $commodityNames;
     }
 
-    public  static  function getCmmStandard($cmm){
-        if ($cmm==null)
-        {
+    public static function getCmmStandard($cmm)
+    {
+        if ($cmm == null) {
             return array();
         }
 
         $db = MySQL::getInstance();
-        $standard=array();
-        $sql = "SELECT DISTINCT standard FROM commodity WHERE `name`='".$cmm."'";
+        $standard = array();
+        $sql = "SELECT DISTINCT standard FROM commodity WHERE `name`='" . $cmm . "'";
         $result = $db->getRowsArray($sql);
         if (count($result) != 0) {
-            foreach ($result as  $item){
-                array_push($standard,$item['standard']);
+            foreach ($result as $item) {
+                array_push($standard, $item['standard']);
             }
         }
         return $standard;
