@@ -21,6 +21,7 @@ if($uid==null||$role==null)
     echo json_encode($returnRes);
     exit(-1);
 }
+CommomUtil::setCookieTime($uid,$role);
 //生成唯一订单编号
 $orderNum=date("YmdHis").'-'.uniqid();
 

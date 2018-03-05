@@ -8,7 +8,11 @@
 error_reporting(0);
 require_once "./CommomUtil.php";
 
-if ($_COOKIE['lsbcSessionID']==null || $_COOKIE['lsbcSessionType']==null) {
+$uid=$_COOKIE["lsbcSessionID"];
+$role=$_COOKIE["lsbcSessionType"];
+
+if($uid==null||$role==null)
+{
 
     $returnRes = array(
         'statusCode' => '000001',
@@ -17,8 +21,7 @@ if ($_COOKIE['lsbcSessionID']==null || $_COOKIE['lsbcSessionType']==null) {
     echo json_encode($returnRes);
     exit(-1);
 }
-$uid=$_COOKIE["lsbcSessionID"];
-$role=$_COOKIE["lsbcSessionType"];
+CommomUtil::setCookieTime($uid,$role);
 
 if (!isset($_POST['orderNum'])) {
     $returnRes = array(

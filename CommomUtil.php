@@ -12,6 +12,10 @@ date_default_timezone_set("Asia/Shanghai");
 
 class CommomUtil
 {
+    public static function  setCookieTime($id,$role){
+        setcookie("lsbcSessionID",$id,time()+3600,'/');
+        setcookie("lsbcSessionType",$role,time()+3600,'/');
+    }
     public static function getMetalByProduct($product)
     {
         $db = MySQL::getInstance();

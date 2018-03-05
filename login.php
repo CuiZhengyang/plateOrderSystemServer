@@ -25,8 +25,9 @@ $db = MySQL::getInstance();
 $sql = " SELECT * from user WHERE name='" . $name . "' and password='" . $pwd . "'";
 $result = $db->getRowsArray($sql);
 if (count($result) == 1) {
-    setcookie("lsbcSessionID",$result[0]["ruid"],time()+3600,'/');
-    setcookie("lsbcSessionType",$result[0]["role"],time()+3600,'/');
+//    setcookie("lsbcSessionID",$result[0]["ruid"],time()+3600,'/');
+//    setcookie("lsbcSessionType",$result[0]["role"],time()+3600,'/');
+    CommomUtil::setCookieTime($result[0]["ruid"],$result[0]["role"]);
     $userInfo=CommomUtil::getUserInfo($result[0]["role"],$result[0]["ruid"]);
     $returnRes = array(
         'statusCode' => '000000',

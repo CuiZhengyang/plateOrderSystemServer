@@ -8,6 +8,22 @@
 error_reporting(0);
 require_once "./CommomUtil.php";
 
+
+$uid=$_COOKIE["lsbcSessionID"];
+$role=$_COOKIE["lsbcSessionType"];
+
+if($uid==null||$role==null)
+{
+
+    $returnRes = array(
+        'statusCode' => '000001',
+        "msg" => "重新登录",
+    );
+    echo json_encode($returnRes);
+    exit(-1);
+}
+CommomUtil::setCookieTime($uid,$role);
+
 if(!isset($_POST["metal"])&&!isset($_POST["product"]))
 {
     $returnRes = array(
