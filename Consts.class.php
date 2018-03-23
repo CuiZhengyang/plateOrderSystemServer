@@ -11,10 +11,13 @@ class Consts
 {
     /***************线上************/
     //数据库IP端口
-    const C_MYSQL_HOST = "127.0.0.1:60001";
+    const C_MYSQL_HOST = "localhost:60001";
 
     //数据库登录账号
     const C_MYSQL_USERNAME = "root";
+
+//    //数据库登录密码
+//    const C_MYSQL_PWD = "czy_2963348";
 
     //数据库登录密码
     const C_MYSQL_PWD = "codoon_ap";
