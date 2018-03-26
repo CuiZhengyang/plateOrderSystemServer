@@ -24,10 +24,10 @@ if($uid==null||$role==null)
 }
 $uid=CommomUtil::secret2string($uid);
 $role=CommomUtil::secret2string($role);
+
+
 CommomUtil::setCookieTime($uid,$role);
 
-$uid = $_COOKIE["lsbcSessionID"];
-$role = $_COOKIE["lsbcSessionType"];
 $list = CommomUtil::getAllOrderList($role, $uid);
 
 $returnRes = array(
